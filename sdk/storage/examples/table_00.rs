@@ -7,8 +7,18 @@ use azure_storage::{
     table::clients::AsTableClient,
 };
 use futures::stream::StreamExt;
+use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::sync::Arc;
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct MyEntity {
+    #[serde(rename = "PartitionKey")]
+    pub city: String,
+    pub name: String,
+    #[serde(rename = "RowKey")]
+    pub surname: String,
+}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
@@ -33,6 +43,15 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     let table = table_service.as_table_client(table_name);
     let response = table.create().execute().await?;
+    println!("response = {:?}\n", response);
+
+    let entity = MyEntity {
+        city: "Milan".to_owned(),
+        name: "Francesco".to_owned(),
+        surname: "Cogno".to_owned(),
+    };
+
+    let response = table.insert().return_entity(false).execute(&entity).await?;
     println!("response = {:?}\n", response);
 
     let mut stream = Box::pin(table_service.list().top(2).stream());

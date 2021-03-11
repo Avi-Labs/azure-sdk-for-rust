@@ -45,6 +45,10 @@ impl TableClient {
         DeleteTableBuilder::new(self)
     }
 
+    pub fn insert(&self) -> InsertEntityBuilder {
+        InsertEntityBuilder::new(self)
+    }
+
     pub(crate) fn url(&self) -> &url::Url {
         self.table_service_client.url()
     }
