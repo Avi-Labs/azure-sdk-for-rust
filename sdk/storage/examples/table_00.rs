@@ -1,8 +1,11 @@
 #[macro_use]
 extern crate log;
 use azure_core::prelude::*;
-use azure_storage::clients::{AsStorageClient, StorageAccountClient};
 use azure_storage::table::prelude::*;
+use azure_storage::{
+    clients::{AsStorageClient, StorageAccountClient},
+    table::clients::AsTableClient,
+};
 use futures::stream::StreamExt;
 use std::error::Error;
 use std::sync::Arc;
@@ -15,6 +18,10 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let master_key =
         std::env::var("STORAGE_MASTER_KEY").expect("Set env variable STORAGE_MASTER_KEY first!");
 
+    let table_name = std::env::args()
+        .nth(1)
+        .expect("please specify the table name as first command line parameter");
+
     let http_client: Arc<Box<dyn HttpClient>> = Arc::new(Box::new(reqwest::Client::new()));
 
     let storage_account_client =
@@ -23,6 +30,10 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let table_service = storage_account_client
         .as_storage_client()
         .as_table_service_client()?;
+
+    let table = table_service.as_table_client(table_name);
+    let response = table.create().execute().await?;
+    println!("response = {:?}\n", response);
 
     let mut stream = Box::pin(table_service.list().top(2).stream());
     while let Some(response) = stream.next().await {
