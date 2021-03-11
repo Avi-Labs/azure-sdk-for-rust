@@ -40,5 +40,8 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
         println!("response = {:?}\n", response);
     }
 
+    let response = table.delete().execute().await?;
+    println!("response = {:?}\n", response);
+
     Ok(())
 }

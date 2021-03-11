@@ -1,6 +1,5 @@
 use crate::{clients::StorageClient, table::requests::ListTablesBuilder};
 use azure_core::errors::AzureError;
-use azure_core::prelude::*;
 use bytes::Bytes;
 use http::method::Method;
 use http::request::{Builder, Request};

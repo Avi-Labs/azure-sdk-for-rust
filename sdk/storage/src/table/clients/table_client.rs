@@ -1,7 +1,6 @@
 use crate::table::prelude::*;
 use crate::table::requests::*;
 use azure_core::errors::AzureError;
-use azure_core::prelude::*;
 use bytes::Bytes;
 use http::method::Method;
 use http::request::{Builder, Request};
@@ -40,6 +39,10 @@ impl TableClient {
 
     pub fn create(&self) -> CreateTableBuilder {
         CreateTableBuilder::new(self)
+    }
+
+    pub fn delete(&self) -> DeleteTableBuilder {
+        DeleteTableBuilder::new(self)
     }
 
     pub(crate) fn url(&self) -> &url::Url {

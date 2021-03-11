@@ -7,12 +7,12 @@ use http::status::StatusCode;
 use std::convert::TryInto;
 
 #[derive(Debug, Clone)]
-pub struct CreateTableBuilder<'a> {
+pub struct DeleteTableBuilder<'a> {
     table_client: &'a TableClient,
     client_request_id: Option<ClientRequestId<'a>>,
 }
 
-impl<'a> CreateTableBuilder<'a> {
+impl<'a> DeleteTableBuilder<'a> {
     pub(crate) fn new(table_client: &'a TableClient) -> Self {
         Self {
             table_client,
@@ -26,32 +26,22 @@ impl<'a> CreateTableBuilder<'a> {
 
     pub async fn execute(
         &self,
-    ) -> Result<CreateTableResponse, Box<dyn std::error::Error + Sync + Send>> {
-        let url = self.table_client.url();
+    ) -> Result<DeleteTableResponse, Box<dyn std::error::Error + Sync + Send>> {
+        let url = self
+            .table_client
+            .url()
+            .join(&format!("/Tables('{}')", self.table_client.table_name()))?;
         debug!("url = {}", url);
-
-        #[derive(Debug, Clone, Serialize)]
-        struct RequestBody<'a> {
-            #[serde(rename = "TableName")]
-            table_name: &'a str,
-        }
-
-        let request_body_serialized = serde_json::to_string(&RequestBody {
-            table_name: self.table_client.table_name(),
-        })?;
-        debug!("payload == {}", request_body_serialized);
 
         let request = self.table_client.prepare_request(
             url.as_str(),
-            &Method::POST,
+            &Method::DELETE,
             &|mut request| {
                 request = add_optional_header(&self.client_request_id, request);
-                request = request.header("Accept", "application/json;odata=fullmetadata");
                 request = request.header("Content-Type", "application/json");
-                request = request.header("Prefer", "return-content");
                 request
             },
-            Some(bytes::Bytes::from(request_body_serialized)),
+            None,
         )?;
 
         debug!("request == {:#?}\n", request);
@@ -59,7 +49,7 @@ impl<'a> CreateTableBuilder<'a> {
         let response = self
             .table_client
             .http_client()
-            .execute_request_check_status(request.0, StatusCode::CREATED)
+            .execute_request_check_status(request.0, StatusCode::NO_CONTENT)
             .await?;
 
         Ok((&response).try_into()?)
