@@ -1,4 +1,4 @@
-use crate::table::prelude::*;
+use crate::EntityWithMetadata;
 use azure_core::{
     errors::AzureError,
     headers::{etag_from_headers, string_from_headers_mandatory, CommonStorageResponseHeaders},
@@ -18,7 +18,7 @@ where
     pub common_storage_response_headers: CommonStorageResponseHeaders,
     pub etag: Etag,
     pub location: Url,
-    pub entity: Option<E>,
+    pub entity_with_metadata: Option<EntityWithMetadata<E>>,
 }
 
 impl<E> TryFrom<&Response<Bytes>> for InsertEntityResponse<E>
@@ -31,16 +31,16 @@ where
         println!("{}", std::str::from_utf8(response.body())?);
         println!("headers == {:#?}", response.headers());
 
-        let entity = match string_from_headers_mandatory(response.headers(), "preference-applied")?
-        {
-            "return-no-content" => None,
-            "return-content" => Some(serde_json::from_slice(response.body())?),
-            _ => {
-                return Err(AzureError::GenericError(
-                    "Unexpected value for preference-applied header",
-                ))
-            }
-        };
+        let entity_with_metadata =
+            match string_from_headers_mandatory(response.headers(), "preference-applied")? {
+                "return-no-content" => None,
+                "return-content" => Some(response.try_into()?),
+                _ => {
+                    return Err(AzureError::GenericErrorWithText(
+                        "Unexpected value for preference-applied header".to_owned(),
+                    ))
+                }
+            };
 
         Ok(InsertEntityResponse {
             common_storage_response_headers: response.headers().try_into()?,
@@ -49,7 +49,7 @@ where
                 response.headers(),
                 "location",
             )?)?,
-            entity,
+            entity_with_metadata,
         })
     }
 }

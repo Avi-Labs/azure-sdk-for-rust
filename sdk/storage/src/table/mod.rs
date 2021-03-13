@@ -1,4 +1,6 @@
 pub mod clients;
+mod entity_metadata;
+mod entity_with_metadata;
 mod filter;
 pub mod prelude;
 pub mod requests;
@@ -7,6 +9,8 @@ mod return_entity;
 mod select;
 mod table;
 mod top;
+pub use entity_metadata::EntityMetadata;
+pub use entity_with_metadata::EntityWithMetadata;
 pub use filter::Filter;
 pub use return_entity::ReturnEntity;
 pub use select::Select;

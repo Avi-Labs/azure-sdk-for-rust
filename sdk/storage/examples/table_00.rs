@@ -1,5 +1,3 @@
-#[macro_use]
-extern crate log;
 use azure_core::prelude::*;
 use azure_storage::table::prelude::*;
 use azure_storage::{
@@ -52,6 +50,14 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     };
 
     let response = table.insert().return_entity(false).execute(&entity).await?;
+    println!("response = {:?}\n", response);
+
+    let entity = MyEntity {
+        city: "Rome".to_owned(),
+        ..entity
+    };
+
+    let response = table.insert().return_entity(true).execute(&entity).await?;
     println!("response = {:?}\n", response);
 
     let mut stream = Box::pin(table_service.list().top(2).stream());
