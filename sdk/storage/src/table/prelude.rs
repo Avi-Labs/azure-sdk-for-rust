@@ -1,4 +1,5 @@
 pub use crate::table::clients::{
-    AsTableClient, AsTableServiceClient, TableClient, TableServiceClient,
+    AsEntityClient, AsTableClient, AsTableServiceClient, EntityClient, TableClient,
+    TableServiceClient,
 };
 pub use crate::table::{Filter, ReturnEntity, Select, Table, Top};

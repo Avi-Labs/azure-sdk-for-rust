@@ -1,4 +1,7 @@
-use crate::{clients::StorageClient, table::requests::ListTablesBuilder};
+use crate::{
+    clients::{StorageAccountClient, StorageClient},
+    table::requests::ListTablesBuilder,
+};
 use azure_core::errors::AzureError;
 use bytes::Bytes;
 use http::method::Method;
@@ -41,6 +44,10 @@ impl TableServiceClient {
 
     pub(crate) fn url(&self) -> &Url {
         &self.url
+    }
+
+    pub(crate) fn storage_account_client(&self) -> &StorageAccountClient {
+        self.storage_client.storage_account_client()
     }
 
     pub(crate) fn http_client(&self) -> &dyn azure_core::HttpClient {
