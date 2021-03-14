@@ -52,12 +52,26 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let response = table.insert().return_entity(false).execute(&entity).await?;
     println!("response = {:?}\n", response);
 
-    let entity = MyEntity {
+    let mut entity = MyEntity {
         city: "Rome".to_owned(),
         ..entity
     };
 
     let response = table.insert().return_entity(true).execute(&entity).await?;
+    println!("response = {:?}\n", response);
+
+    let entity_client = table.as_entity_client(&entity.city, &entity.surname)?;
+    // update the name passing the Etag received from the previous call.
+    entity.name = "Ryan".to_owned();
+    let response = entity_client
+        .update()
+        .execute(&entity, &(response.etag.into()))
+        .await?;
+    println!("response = {:?}\n", response);
+
+    // now we perform an upsert
+    entity.name = "Carl".to_owned();
+    let response = entity_client.insert_or_replace().execute(&entity).await?;
     println!("response = {:?}\n", response);
 
     let mut stream = Box::pin(table_service.list().top(2).stream());
