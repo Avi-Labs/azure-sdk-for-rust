@@ -1,7 +1,6 @@
 use crate::table::prelude::*;
 use crate::table::responses::*;
-use crate::table::IfMatchCondition;
-use azure_core::headers::{add_mandatory_header, add_optional_header};
+use azure_core::headers::add_optional_header;
 use azure_core::prelude::*;
 use http::{method::Method, StatusCode};
 use serde::Serialize;
@@ -9,19 +8,19 @@ use std::convert::TryInto;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(crate) enum Operation {
-    Update,
-    Merge,
+    InsertOrReplace,
+    InsertOrMerge,
 }
 
 #[derive(Debug, Clone)]
-pub struct UpdateOrMergeEntityBuilder<'a> {
+pub struct InsertOrReplaceOrMergeEntityBuilder<'a> {
     entity_client: &'a EntityClient,
     operation: Operation,
     timeout: Option<Timeout>,
     client_request_id: Option<ClientRequestId<'a>>,
 }
 
-impl<'a> UpdateOrMergeEntityBuilder<'a> {
+impl<'a> InsertOrReplaceOrMergeEntityBuilder<'a> {
     pub(crate) fn new(entity_client: &'a EntityClient, operation: Operation) -> Self {
         Self {
             entity_client,
@@ -39,7 +38,6 @@ impl<'a> UpdateOrMergeEntityBuilder<'a> {
     pub async fn execute<E>(
         &self,
         entity: &E,
-        if_match_condition: &IfMatchCondition,
     ) -> Result<OperationOnEntityResponse, Box<dyn std::error::Error + Sync + Send>>
     where
         E: Serialize,
@@ -53,13 +51,12 @@ impl<'a> UpdateOrMergeEntityBuilder<'a> {
         let request = self.entity_client.prepare_request(
             url.as_str(),
             match self.operation {
-                Operation::Merge => &crate::table::MERGE,
-                Operation::Update => &Method::PUT,
+                Operation::InsertOrMerge => &crate::table::MERGE,
+                Operation::InsertOrReplace => &Method::PUT,
             },
             &|mut request| {
                 request = add_optional_header(&self.client_request_id, request);
                 request = request.header("Content-Type", "application/json");
-                request = add_mandatory_header(if_match_condition, request);
                 request
             },
             Some(bytes::Bytes::from(request_body_serialized)),

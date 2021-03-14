@@ -75,6 +75,20 @@ impl EntityClient {
         UpdateOrMergeEntityBuilder::new(self, update_or_merge_entity_builder::Operation::Merge)
     }
 
+    pub fn insert_or_replace(&self) -> InsertOrReplaceOrMergeEntityBuilder {
+        InsertOrReplaceOrMergeEntityBuilder::new(
+            self,
+            insert_or_replace_or_merge_entity_builder::Operation::InsertOrReplace,
+        )
+    }
+
+    pub fn insert_or_merge(&self) -> InsertOrReplaceOrMergeEntityBuilder {
+        InsertOrReplaceOrMergeEntityBuilder::new(
+            self,
+            insert_or_replace_or_merge_entity_builder::Operation::InsertOrMerge,
+        )
+    }
+
     pub(crate) fn url(&self) -> &Url {
         &self.url
     }

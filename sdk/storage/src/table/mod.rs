@@ -18,3 +18,8 @@ pub use return_entity::ReturnEntity;
 pub use select::Select;
 pub use table::Table;
 pub use top::Top;
+
+// we need this since the http::Method does not have the MERGE verb. The unwrap is safe here.
+lazy_static! {
+    static ref MERGE: http::Method = http::Method::from_bytes(b"MERGE").unwrap();
+}
