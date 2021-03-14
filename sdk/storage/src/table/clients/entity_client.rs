@@ -67,6 +67,14 @@ impl EntityClient {
         &self.row_key
     }
 
+    pub fn update(&self) -> UpdateOrMergeEntityBuilder {
+        UpdateOrMergeEntityBuilder::new(self, update_or_merge_entity_builder::Operation::Update)
+    }
+
+    pub fn merge(&self) -> UpdateOrMergeEntityBuilder {
+        UpdateOrMergeEntityBuilder::new(self, update_or_merge_entity_builder::Operation::Merge)
+    }
+
     pub(crate) fn url(&self) -> &Url {
         &self.url
     }
