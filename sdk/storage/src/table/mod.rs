@@ -1,5 +1,5 @@
 mod batch;
-mod change_set;
+mod batch_operation;
 pub mod clients;
 mod entity_metadata;
 mod entity_with_metadata;
@@ -13,7 +13,7 @@ mod select;
 mod table;
 mod top;
 pub use batch::Batch;
-pub use change_set::ToChangeSet;
+pub use batch_operation::BatchOperation;
 pub use entity_metadata::EntityMetadata;
 pub use entity_with_metadata::EntityWithMetadata;
 pub use filter::Filter;

@@ -69,4 +69,29 @@ impl<'a> InsertEntityBuilder<'a> {
 
         Ok((&response).try_into()?)
     }
+
+    pub fn to_batch<E>(
+        &self,
+        entity: &E,
+    ) -> Result<BatchOperation, Box<dyn std::error::Error + Send + Sync>>
+    where
+        E: Serialize,
+    {
+        let url = self
+            .table_client
+            .url()
+            .join(self.table_client.table_name())?;
+
+        let request = http::Request::builder()
+            .method(Method::POST)
+            .uri(url.as_str());
+        let request = add_optional_header(&self.client_request_id, request);
+        let request = add_mandatory_header(&self.return_entity, request);
+        let request = request.header("Accept", "application/json;odata=fullmetadata");
+        let request = request.header("Content-Type", "application/json");
+
+        let request = request.body(serde_json::to_string(entity)?)?;
+
+        Ok(BatchOperation::new(request))
+    }
 }

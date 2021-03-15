@@ -3,5 +3,5 @@ pub use crate::table::clients::{
     TableServiceClient,
 };
 pub use crate::table::{
-    Batch, Filter, IfMatchCondition, ReturnEntity, Select, Table, ToChangeSet, Top,
+    Batch, BatchOperation, Filter, IfMatchCondition, ReturnEntity, Select, Table, Top,
 };
