@@ -30,11 +30,13 @@ impl<'a> SubmitTransactionBuilder<'a> {
         &self,
         batch: &Transaction,
     ) -> Result<SubmitTransactionResponse, Box<dyn std::error::Error + Sync + Send>> {
-        let url = self
+        let mut url = self
             .partition_key_client
             .table_client()
             .url()
             .join("$batch")?;
+
+        self.timeout.append_to_url_query(&mut url);
         println!("url = {}", url);
 
         let payload = batch.to_string()?;

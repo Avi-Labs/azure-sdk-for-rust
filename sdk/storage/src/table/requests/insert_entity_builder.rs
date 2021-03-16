@@ -38,10 +38,12 @@ impl<'a> InsertEntityBuilder<'a> {
     where
         E: Serialize + DeserializeOwned,
     {
-        let url = self
+        let mut url = self
             .table_client
             .url()
             .join(self.table_client.table_name())?;
+
+        self.timeout.append_to_url_query(&mut url);
         println!("url = {}", url);
 
         let request_body_serialized = serde_json::to_string(entity)?;
@@ -87,7 +89,6 @@ impl<'a> InsertEntityBuilder<'a> {
             .method(Method::POST)
             .uri(url.as_str());
         let request = add_optional_header(&self.client_request_id, request);
-        let request = add_mandatory_header(&self.return_entity, request);
         let request = request.header("Accept", "application/json;odata=fullmetadata");
         let request = request.header("Content-Type", "application/json");
 

@@ -61,6 +61,14 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     entity.surname = "Karl".to_owned();
     transaction.add(table.insert().to_transaction_operation(&entity)?);
 
+    entity.surname = "Potter".to_owned();
+    let entity_client = partition_key_client.as_entity_client(&entity.surname)?;
+    transaction.add(
+        entity_client
+            .insert_or_replace()
+            .to_transaction_operation(&entity)?,
+    );
+
     let response = partition_key_client
         .submit_transaction()
         .execute(&transaction)
