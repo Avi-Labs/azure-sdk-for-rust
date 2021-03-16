@@ -4,7 +4,6 @@ use azure_storage::{
     clients::{AsStorageClient, StorageAccountClient},
     table::clients::AsTableClient,
 };
-use futures::stream::StreamExt;
 use serde::{Deserialize, Serialize};
 use std::error::Error;
 use std::sync::Arc;
