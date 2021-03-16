@@ -53,7 +53,7 @@ impl PartitionKeyClient {
         self.table_client.http_client()
     }
 
-    pub(crate) fn prepare_request<'a>(
+    pub(crate) fn prepare_request(
         &self,
         url: &str,
         method: &Method,

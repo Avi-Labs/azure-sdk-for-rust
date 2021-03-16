@@ -81,7 +81,7 @@ impl EntityClient {
         self.partition_key_client.http_client()
     }
 
-    pub(crate) fn prepare_request<'a>(
+    pub(crate) fn prepare_request(
         &self,
         url: &str,
         method: &Method,
