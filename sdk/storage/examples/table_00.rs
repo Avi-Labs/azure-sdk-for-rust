@@ -43,41 +43,56 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
     let response = table.create().execute().await?;
     println!("response = {:?}\n", response);
 
-    let entity = MyEntity {
+    let mut entity = MyEntity {
         city: "Milan".to_owned(),
         name: "Francesco".to_owned(),
         surname: "Cogno".to_owned(),
     };
 
-    let response = table.insert().return_entity(false).execute(&entity).await?;
+    let partition_key_client = table.as_partition_key_client(&entity.city);
+
+    let mut batch = Batch::default();
+
+    batch.add(table.insert().to_batch(&entity)?);
+
+    entity.surname = "Doe".to_owned();
+    batch.add(table.insert().to_batch(&entity)?);
+
+    entity.surname = "Karl".to_owned();
+    batch.add(table.insert().to_batch(&entity)?);
+
+    let response = partition_key_client.submit_batch().execute(&batch).await?;
     println!("response = {:?}\n", response);
 
-    let mut entity = MyEntity {
-        city: "Rome".to_owned(),
-        ..entity
-    };
+    //let response = table.insert().return_entity(false).execute(&entity).await?;
+    //println!("response = {:?}\n", response);
 
-    let response = table.insert().return_entity(true).execute(&entity).await?;
-    println!("response = {:?}\n", response);
+    //let mut entity = MyEntity {
+    //    city: "Rome".to_owned(),
+    //    ..entity
+    //};
 
-    let entity_client = table.as_entity_client(&entity.city, &entity.surname)?;
-    // update the name passing the Etag received from the previous call.
-    entity.name = "Ryan".to_owned();
-    let response = entity_client
-        .update()
-        .execute(&entity, &(response.etag.into()))
-        .await?;
-    println!("response = {:?}\n", response);
+    //let response = table.insert().return_entity(true).execute(&entity).await?;
+    //println!("response = {:?}\n", response);
 
-    // now we perform an upsert
-    entity.name = "Carl".to_owned();
-    let response = entity_client.insert_or_replace().execute(&entity).await?;
-    println!("response = {:?}\n", response);
+    //let entity_client = table.as_entity_client(&entity.city, &entity.surname)?;
+    //// update the name passing the Etag received from the previous call.
+    //entity.name = "Ryan".to_owned();
+    //let response = entity_client
+    //    .update()
+    //    .execute(&entity, &(response.etag.into()))
+    //    .await?;
+    //println!("response = {:?}\n", response);
 
-    let mut stream = Box::pin(table_service.list().top(2).stream());
-    while let Some(response) = stream.next().await {
-        println!("response = {:?}\n", response);
-    }
+    //// now we perform an upsert
+    //entity.name = "Carl".to_owned();
+    //let response = entity_client.insert_or_replace().execute(&entity).await?;
+    //println!("response = {:?}\n", response);
+
+    //let mut stream = Box::pin(table_service.list().top(2).stream());
+    //while let Some(response) = stream.next().await {
+    //    println!("response = {:?}\n", response);
+    //}
 
     let response = table.delete().execute().await?;
     println!("response = {:?}\n", response);

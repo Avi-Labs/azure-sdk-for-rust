@@ -24,8 +24,18 @@ impl Batch {
         self
     }
 
+    pub(crate) fn batch_uuid(&self) -> &Uuid {
+        &self.batch_uuid
+    }
+
     pub(crate) fn to_string(&self) -> Result<String, http::header::ToStrError> {
         let mut s = String::new();
+
+        s.push_str(&format!(
+            "--batch_{}\nContent-Type: multipart/mixed; boundary=changeset_{}\n\n",
+            self.batch_uuid.to_hyphenated_ref(),
+            self.change_set_uuid.to_hyphenated_ref()
+        ));
 
         for batch_operation in self.batch_operations.iter() {
             s.push_str(&format!("--changeset_{}\nContent-Type: application/http\nContent-Transfer-Encoding: binary\n\n", self.change_set_uuid.to_hyphenated_ref()));
@@ -45,12 +55,12 @@ impl Batch {
             }
         }
 
-        Ok(format!(
-            "--batch_{}\nContent-Type: multipart/mixed; boundary=changeset_{}\n\n{}\n--batch_{}--\n",
-            self.batch_uuid.to_hyphenated_ref(),
+        s.push_str(&format!(
+            "\n--changeset_{}--\n--batch_{}\n",
             self.change_set_uuid.to_hyphenated_ref(),
-            s,
-            self.batch_uuid.to_hyphenated_ref()
-        ))
+            self.batch_uuid.to_hyphenated_ref(),
+        ));
+
+        Ok(s)
     }
 }
