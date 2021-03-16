@@ -1,5 +1,6 @@
 use crate::table::prelude::*;
 use crate::table::responses::*;
+use crate::table::TransactionOperation;
 use azure_core::headers::{add_mandatory_header, add_optional_header};
 use azure_core::prelude::*;
 use http::method::Method;
@@ -70,10 +71,10 @@ impl<'a> InsertEntityBuilder<'a> {
         Ok((&response).try_into()?)
     }
 
-    pub fn to_batch<E>(
+    pub fn to_transaction_operation<E>(
         &self,
         entity: &E,
-    ) -> Result<BatchOperation, Box<dyn std::error::Error + Send + Sync>>
+    ) -> Result<TransactionOperation, Box<dyn std::error::Error + Send + Sync>>
     where
         E: Serialize,
     {
@@ -92,6 +93,6 @@ impl<'a> InsertEntityBuilder<'a> {
 
         let request = request.body(serde_json::to_string(entity)?)?;
 
-        Ok(BatchOperation::new(request))
+        Ok(TransactionOperation::new(request))
     }
 }

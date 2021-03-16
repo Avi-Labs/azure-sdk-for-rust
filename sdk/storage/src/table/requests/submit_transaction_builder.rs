@@ -28,8 +28,8 @@ impl<'a> SubmitTransactionBuilder<'a> {
 
     pub async fn execute(
         &self,
-        batch: &Batch,
-    ) -> Result<SubmitBatchResponse, Box<dyn std::error::Error + Sync + Send>> {
+        batch: &Transaction,
+    ) -> Result<SubmitTransactionResponse, Box<dyn std::error::Error + Sync + Send>> {
         let url = self
             .partition_key_client
             .table_client()

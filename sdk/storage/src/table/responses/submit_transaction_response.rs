@@ -13,12 +13,12 @@ pub struct OperationResponse {
 }
 
 #[derive(Debug, Clone)]
-pub struct SubmitBatchResponse {
+pub struct SubmitTransactionResponse {
     pub common_storage_response_headers: CommonStorageResponseHeaders,
     pub operation_responses: Vec<OperationResponse>,
 }
 
-impl TryFrom<&Response<Bytes>> for SubmitBatchResponse {
+impl TryFrom<&Response<Bytes>> for SubmitTransactionResponse {
     type Error = AzureError;
 
     fn try_from(response: &Response<Bytes>) -> Result<Self, Self::Error> {
@@ -43,7 +43,7 @@ impl TryFrom<&Response<Bytes>> for SubmitBatchResponse {
                         .split_whitespace()
                         .nth(1)
                         .ok_or_else(|| {
-                            AzureError::BatchResponseParseError(
+                            AzureError::TransactionResponseParseError(
                                 "missing HTTP status code".to_owned(),
                             )
                         })?
@@ -53,7 +53,7 @@ impl TryFrom<&Response<Bytes>> for SubmitBatchResponse {
                         line.split_whitespace()
                             .nth(1)
                             .ok_or_else(|| {
-                                AzureError::BatchResponseParseError(
+                                AzureError::TransactionResponseParseError(
                                     "invalid Location header".to_owned(),
                                 )
                             })?
@@ -66,7 +66,7 @@ impl TryFrom<&Response<Bytes>> for SubmitBatchResponse {
                             .ok_or_else(|| {
                                 {
                                     {
-                                        AzureError::BatchResponseParseError(
+                                        AzureError::TransactionResponseParseError(
                                             "invalid DataServiceId header".to_owned(),
                                         )
                                     }
@@ -81,7 +81,7 @@ impl TryFrom<&Response<Bytes>> for SubmitBatchResponse {
                             .ok_or_else(|| {
                                 {
                                     {
-                                        AzureError::BatchResponseParseError(
+                                        AzureError::TransactionResponseParseError(
                                             "invalid ETag header".to_owned(),
                                         )
                                     }
@@ -95,7 +95,7 @@ impl TryFrom<&Response<Bytes>> for SubmitBatchResponse {
             operation_responses.push(operation_response);
         }
 
-        Ok(SubmitBatchResponse {
+        Ok(SubmitTransactionResponse {
             common_storage_response_headers: response.headers().try_into()?,
             operation_responses,
         })

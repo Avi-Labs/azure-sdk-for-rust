@@ -1,11 +1,11 @@
 use http::request::Request;
 
 #[derive(Debug)]
-pub struct BatchOperation {
+pub struct TransactionOperation {
     pub(crate) request: Request<String>,
 }
 
-impl BatchOperation {
+impl TransactionOperation {
     pub(crate) fn new(request: Request<String>) -> Self {
         Self { request }
     }

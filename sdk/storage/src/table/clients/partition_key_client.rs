@@ -33,7 +33,7 @@ impl PartitionKeyClient {
         })
     }
 
-    pub fn submit_batch(&self) -> SubmitTransactionBuilder {
+    pub fn submit_transaction(&self) -> SubmitTransactionBuilder {
         SubmitTransactionBuilder::new(self)
     }
 

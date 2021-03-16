@@ -51,17 +51,20 @@ async fn main() -> Result<(), Box<dyn Error + Send + Sync>> {
 
     let partition_key_client = table.as_partition_key_client(&entity.city);
 
-    let mut batch = Batch::default();
+    let mut transaction = Transaction::default();
 
-    batch.add(table.insert().to_batch(&entity)?);
+    transaction.add(table.insert().to_transaction_operation(&entity)?);
 
     entity.surname = "Doe".to_owned();
-    batch.add(table.insert().to_batch(&entity)?);
+    transaction.add(table.insert().to_transaction_operation(&entity)?);
 
     entity.surname = "Karl".to_owned();
-    batch.add(table.insert().to_batch(&entity)?);
+    transaction.add(table.insert().to_transaction_operation(&entity)?);
 
-    let response = partition_key_client.submit_batch().execute(&batch).await?;
+    let response = partition_key_client
+        .submit_transaction()
+        .execute(&transaction)
+        .await?;
     println!("response = {:?}\n", response);
 
     //let response = table.insert().return_entity(false).execute(&entity).await?;

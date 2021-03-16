@@ -315,9 +315,9 @@ quick_error! {
             display("Invalid status code: {:?}", err)
             cause(err)
         }
-        BatchResponseParseError(err: String) {
+        TransactionResponseParseError(err: String) {
             from()
-            display("Error parsing the batch response: {:?}", err)
+            display("Error parsing the transaction response: {:?}", err)
         }
     }
 }
